@@ -30,6 +30,8 @@ dependencies {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	compile group: 'org.springframework.boot', name: 'spring-boot-devtools', version: '2.2.4.RELEASE'
+	compile('org.springframework.cloud:spring-cloud-config-server')
+    testCompile('org.springframework.boot:spring-boot-starter-test') 
 }
 
 dependencyManagement {
