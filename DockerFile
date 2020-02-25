@@ -1,0 +1,34 @@
+FROM openjdk:8-jdk-alpine
+VOLUME /tmp
+# Make port 8080 available to the world outside this container
+ARG DEF_PORT
+# Spring App suffix , default is jar file
+ARG APP_FILE_SUFFIX="jar"
+ARG APP_FILE_NAME
+
+ENV PORT=${DEF_PORT}
+ENV APP_FILE_NAME=${APP_FILE_NAME}
+ENV APP_FILE=build/libs/${APP_FILE_NAME}-0.1.0.${APP_FILE_SUFFIX}
+ENV RUN_FILE=app.${APP_FILE_SUFFIX}
+
+RUN test -n "$PORT"
+RUN test -n "$APP_FILE_NAME"
+
+RUN echo "DEF_PORT=${PORT}"
+RUN echo "APP_FILE=${APP_FILE}"
+RUN echo "RUN_FILE=${RUN_FILE}"
+
+RUN echo "HEALTHCHECK: curl -f http://localhost:${PORT}/actuator/health"
+
+# The application's jar file
+ADD ${APP_FILE} ${RUN_FILE}
+
+HEALTHCHECK --interval=3m --timeout=10s --retries=5 \
+      CMD curl -f http://localhost:${PORT}/actuator/health || exit 1
+
+# health doc: https://howchoo.com/g/zwjhogrkywe/how-to-add-a-health-check-to-your-docker-container
+# command : docker inspect --format='{{json .State.Health}}' container_name
+
+EXPOSE $PORT
+
+ENTRYPOINT exec java $JAVA_OPTS -jar /$RUN_FILE
